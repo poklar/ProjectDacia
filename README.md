@@ -1,5 +1,5 @@
 # ProjectDacia
-Hopefully a Dwarf Fortress kind of game
+Hopefully a base building kind of game
 
 
 About this project:
