@@ -81,7 +81,7 @@ namespace TechCraftEngine.WorldEngine
                 {
                     for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
                     {
-                        writer.Write((byte)_region.Blocks[x, y, z]);
+                        writer.Write((byte)_region.Blocks[x, y, z].BlockType);
                     }
                 }
             }
@@ -97,7 +97,7 @@ namespace TechCraftEngine.WorldEngine
                 {
                     for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
                     {
-                        _region.Blocks[x, y, z] = (BlockType) reader.ReadByte();
+                        _region.Blocks[x, y, z].BlockType = (BlockType) reader.ReadByte();
                     }
                 }
             }

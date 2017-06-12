@@ -16,7 +16,7 @@ namespace TechCraftEngine.WorldEngine.Generators
             {
                 groundHeight = 1;
             }
-            else if (groundHeight > WorldSettings.REGIONHEIGHT)
+            else if (groundHeight > 128)
             {
                 groundHeight = 96;
             }
@@ -24,8 +24,8 @@ namespace TechCraftEngine.WorldEngine.Generators
             // Default to sunlit.. for caves
             bool sunlit = true;
             BlockType BlockType = BlockType.None;
-            chunk.Blocks[x, groundHeight, z] = BlockType.Grass;
-            chunk.Blocks[x, 0, z] = BlockType.Dirt;
+            chunk.Blocks[x, groundHeight, z].BlockType = BlockType.Grass;
+            chunk.Blocks[x, 0, z].BlockType = BlockType.Dirt;
             for (int y = worldDepthInBlocks - 1; y > 0; y--)
             {
                 if (y > groundHeight)

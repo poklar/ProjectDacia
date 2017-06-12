@@ -78,8 +78,9 @@ namespace TechCraftEngine.WorldEngine
                     bool inShadow = false;
                     for (int y = WorldSettings.MAPHEIGHT - 1; y > 0 ; y--)
                     {
-                        BlockType blockType = _world.BlockAt(x, y, z);
-                        if (!BlockInformation.IsLightTransparentBlock(blockType) && !inShadow)
+                        Block block = _world.BlockAt(x, y, z);
+
+                        if (!BlockInformation.IsLightTransparentBlock(block.BlockType) && !inShadow)
                         {
                             inShadow = true;
                             _lightHeight[x, z] = y+1;
@@ -92,7 +93,7 @@ namespace TechCraftEngine.WorldEngine
                         else
                         {
                             _lighting[x, y, z] = WorldSettings.MINLIGHT;
-                            if (BlockInformation.IsLightEmittingBlock(blockType))
+                            if (BlockInformation.IsLightEmittingBlock(block.BlockType))
                             {
                                 toLight.Enqueue(new Light(x, y, z, WorldSettings.MAXLIGHT));
                             }
@@ -188,7 +189,7 @@ namespace TechCraftEngine.WorldEngine
                 {
                     _lighting[x, y, z] = intensity;
                     _world.MakeDirty(x, y, z);
-                    if (BlockInformation.IsLightTransparentBlock(_world.BlockAt(x, y, z)))
+                    if (BlockInformation.IsLightTransparentBlock(_world.BlockAt(x, y, z).BlockType))
                     {
                         toLight.Enqueue(new Light(x, y, z, intensity));
                     }
@@ -222,7 +223,7 @@ namespace TechCraftEngine.WorldEngine
                 {
                     _lighting[x, y, z] = WorldSettings.MINLIGHT;
                     // If we're in sunlight on a light emitter we need to requeue
-                    if (y >= _lightHeight[x, z] || BlockInformation.IsLightEmittingBlock(_world.BlockAt(x, y, z)))
+                    if (y >= _lightHeight[x, z] || BlockInformation.IsLightEmittingBlock(_world.BlockAt(x, y, z).BlockType))
                     {
                         // We darked a light so schedule it to be relit
                         toLight.Enqueue(new Light(x, y, z, WorldSettings.MAXLIGHT+1));

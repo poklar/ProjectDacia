@@ -156,7 +156,7 @@ namespace TechCraft
                         
                         if (r.Next(5) != 1)
                         {
-                            BlockType type = _world.BlockAt(x, y, z);
+                            BlockType type = _world.BlockAt(x, y, z).BlockType;
                             if (type != BlockType.None && type != BlockType.Water)
                             {
                                 _world.RemoveBlock(x, y, z);
@@ -192,7 +192,7 @@ namespace TechCraft
         private bool CheckCollision(int projectile)
         {
             Vector3 position = _projectilePool[projectile].Position;
-            BlockType block = _world.BlockAtPoint(position);
+            BlockType block = _world.BlockTypeAtPoint(position);
             if (block != BlockType.None && block!=BlockType.Water)
             {
                 Explode((int)position.X, (int)position.Y, (int)position.Z);

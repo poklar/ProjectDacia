@@ -4,18 +4,18 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/blocks.png</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/checker.bmp</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/CubeEffect.fx</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/explosion.png</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/fire.png</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/font.spritefont</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/grid.x</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/ParticleEffect.fx</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/smoke.png</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/SolidBlockEffect.fx</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/WaterBlockEffect.fx</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Textures/tileSelector.png</File>
-    <File>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Textures/tileStrip.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/blocks.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/checker.bmp</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/CubeEffect.fx</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/explosion.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/fire.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/font.spritefont</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/grid.x</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/ParticleEffect.fx</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/smoke.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/SolidBlockEffect.fx</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/WaterBlockEffect.fx</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Textures/tileSelector.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Textures/tileStrip.png</File>
   </SourceFiles>
 </SourceFileCollection>

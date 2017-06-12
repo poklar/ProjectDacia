@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using TechCraftEngine.WorldEngine.Generators;
+using System.Diagnostics;
 
 namespace TechCraftEngine.WorldEngine
 {
@@ -27,6 +28,7 @@ namespace TechCraftEngine.WorldEngine
 
         // Rendering statistics
         private int _regionsDrawn;
+        private int _currentMapLevel = 20;
         //private int _regionsBuilt;
         //private int _polysDrawn;
 
@@ -45,6 +47,12 @@ namespace TechCraftEngine.WorldEngine
         {
             _game = game;
             //_blockNone = new Block(BlockType.None);
+        }
+
+        public int CURRENTMAPLEVEL
+        {
+            get { return _currentMapLevel; }
+            set { _currentMapLevel = value; }
         }
 
         public VertexDeclaration VertexDeclaration
@@ -173,6 +181,7 @@ namespace TechCraftEngine.WorldEngine
                                 if (region.SolidVertexBuffer != null)
                                 {
                                     _regionsDrawn++;
+                                
                                     
                                     //_game.GraphicsDevice.Vertices[0].SetSource(region.SolidVertexBuffer, 0, VertexPositionTextureShade.SizeInBytes);
                                     _game.GraphicsDevice.SetVertexBuffer(region.SolidVertexBuffer); 
@@ -186,17 +195,18 @@ namespace TechCraftEngine.WorldEngine
                 }
                 //pass.End();
             }
+            Debug.WriteLine("regions: " + _regionsDrawn);
             //_solidBlockEffect.End();
-
-            if (!underWater)
+            
+            /*if (!underWater)
             {
 
                 rippleTime += 0.1f;
 
-               /* _game.GraphicsDevice.RenderState.AlphaBlendEnable = true;
-                _game.GraphicsDevice.RenderState.SourceBlend = Blend.SourceAlpha;
-                _game.GraphicsDevice.RenderState.DestinationBlend = Blend.InverseSourceAlpha;
-                */
+                //_game.GraphicsDevice.RenderState.AlphaBlendEnable = true;
+                //_game.GraphicsDevice.RenderState.SourceBlend = Blend.SourceAlpha;
+                //_game.GraphicsDevice.RenderState.DestinationBlend = Blend.InverseSourceAlpha;
+                
                 _game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
                 _waterBlockEffect.Parameters["World"].SetValue(Matrix.Identity);
@@ -242,7 +252,7 @@ namespace TechCraftEngine.WorldEngine
                    // pass.End();
                 }
                // _waterBlockEffect.End();
-            }
+            }*/
 
             //_game.GraphicsDevice.RenderState.AlphaBlendEnable = false;
             _game.GraphicsDevice.BlendState = BlendState.Opaque; 
@@ -300,12 +310,12 @@ namespace TechCraftEngine.WorldEngine
 
         private void DoWaterFlow(Flow water)
         {
-            BlockType xDecreasing = BlockAt(water.X - 1, water.Y, water.Z);
-            BlockType xIncreasing = BlockAt(water.X + 1, water.Y, water.Z);
-            BlockType yDecreasing = BlockAt(water.X, water.Y - 1, water.Z);
-            BlockType yIncreasing = BlockAt(water.X, water.Y + 1, water.Z);
-            BlockType zDecreasing = BlockAt(water.X, water.Y, water.Z - 1);
-            BlockType zIncreasing = BlockAt(water.X, water.Y, water.Z + 1);
+            BlockType xDecreasing = BlockAt(water.X - 1, water.Y, water.Z).BlockType;
+            BlockType xIncreasing = BlockAt(water.X + 1, water.Y, water.Z).BlockType;
+            BlockType yDecreasing = BlockAt(water.X, water.Y - 1, water.Z).BlockType;
+            BlockType yIncreasing = BlockAt(water.X, water.Y + 1, water.Z).BlockType;
+            BlockType zDecreasing = BlockAt(water.X, water.Y, water.Z - 1).BlockType;
+            BlockType zIncreasing = BlockAt(water.X, water.Y, water.Z + 1).BlockType;
 
             // Don't flow water onto water
             // if (yDecreasing == BlockType.Water) return;
@@ -340,12 +350,12 @@ namespace TechCraftEngine.WorldEngine
         private void DoLavaFlow(Flow lava)
         {
 
-            BlockType xDecreasing = BlockAt(lava.X - 1, lava.Y, lava.Z);
-            BlockType xIncreasing = BlockAt(lava.X + 1, lava.Y, lava.Z);
-            BlockType yDecreasing = BlockAt(lava.X, lava.Y - 1, lava.Z);
-            BlockType yIncreasing = BlockAt(lava.X, lava.Y + 1, lava.Z);
-            BlockType zDecreasing = BlockAt(lava.X, lava.Y, lava.Z - 1);
-            BlockType zIncreasing = BlockAt(lava.X, lava.Y, lava.Z + 1);
+            BlockType xDecreasing = BlockAt(lava.X - 1, lava.Y, lava.Z).BlockType;
+            BlockType xIncreasing = BlockAt(lava.X + 1, lava.Y, lava.Z).BlockType;
+            BlockType yDecreasing = BlockAt(lava.X, lava.Y - 1, lava.Z).BlockType;
+            BlockType yIncreasing = BlockAt(lava.X, lava.Y + 1, lava.Z).BlockType;
+            BlockType zDecreasing = BlockAt(lava.X, lava.Y, lava.Z - 1).BlockType;
+            BlockType zIncreasing = BlockAt(lava.X, lava.Y, lava.Z + 1).BlockType;
 
             // Don't lava onto water or lava
             if (yDecreasing == BlockType.Water || yDecreasing == BlockType.Lava) return;
@@ -399,20 +409,33 @@ namespace TechCraftEngine.WorldEngine
             }
         }
 
-        public BlockType BlockAtPoint(Vector3 position) {
-            return BlockAt((int)position.X, (int)position.Y, (int)position.Z);
+        public BlockType BlockTypeAtPoint(Vector3 position) {
+            return BlockAt((int)position.X, (int)position.Y, (int)position.Z).BlockType;
         }
 
-        public BlockType BlockAt(int x, int y, int z)
+        /*public BlockType BlockTypeAt(int x, int y, int z)
         {
             if (InWorldBounds(x, y, z))
             {
                 Region region = _regions[x / WorldSettings.REGIONWIDTH, y / WorldSettings.REGIONHEIGHT, z / WorldSettings.REGIONLENGTH];
-                return region.BlockAt(x % WorldSettings.REGIONWIDTH, y % WorldSettings.REGIONHEIGHT, z % WorldSettings.REGIONLENGTH);
+                return region.BlockTypeAt(x % WorldSettings.REGIONWIDTH, y % WorldSettings.REGIONHEIGHT, z % WorldSettings.REGIONLENGTH);
             }
             else
             {
                 return BlockType.None;
+            }
+        }*/
+
+        public Block BlockAt(int x, int y, int z)
+        {
+            if (InWorldBounds(x, y, z))
+            {
+                Region region = _regions[x / WorldSettings.REGIONWIDTH, y / WorldSettings.REGIONHEIGHT, z / WorldSettings.REGIONLENGTH];             
+                return region.BlockAt(x % WorldSettings.REGIONWIDTH, y % WorldSettings.REGIONHEIGHT, z % WorldSettings.REGIONLENGTH);
+            }
+            else
+            {
+                return new Block(BlockType.None);
             }
         }
 
@@ -459,7 +482,7 @@ namespace TechCraftEngine.WorldEngine
 
         public bool SolidAt(int x, int y, int z)
         {
-            BlockType blockType = BlockAt(x, y, z);
+            BlockType blockType = BlockAt(x, y, z).BlockType;
             return BlockInformation.IsSolidBlock(blockType);
         }
 
