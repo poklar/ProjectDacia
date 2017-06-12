@@ -10,12 +10,17 @@ namespace TechCraftEngine.WorldEngine
     {
         private bool _isActive = false;
 
-        public BlockType Type;
+        private BlockType _type;
         public byte FaceInfo;
-        
+
+        public Block()
+        {
+
+        }
+
         public Block(BlockType type)
         {
-            Type = type;
+            _type = type;
             FaceInfo = 0;
         }
 
@@ -23,6 +28,12 @@ namespace TechCraftEngine.WorldEngine
         {
             get { return _isActive; }
             set { _isActive = value; }
+        }
+
+        public BlockType BlockType
+        {
+            get { return _type; }
+            set { _type = value; }
         }
     }
 }

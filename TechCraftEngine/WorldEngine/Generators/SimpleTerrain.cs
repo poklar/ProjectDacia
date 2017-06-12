@@ -20,7 +20,7 @@ namespace TechCraftEngine.WorldEngine.Generators
                     generateTerrain(chunk, x, z, worldX, worldZ, WorldSettings.MAPHEIGHT);
                 }
             }
-            chunk.BuildVertexBuffers();
+            //chunk.BuildVertexBuffers();
             chunk.Dirty = false;
 
         }

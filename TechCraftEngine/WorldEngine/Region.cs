@@ -24,7 +24,7 @@ namespace TechCraftEngine.WorldEngine
     {
         private Vector3i _position;
 
-        public BlockType[, ,] Blocks { get; set; }
+        public Block[, ,] Blocks { get; set; }
         private byte[, ,] _faceInfo;
         private World _world;
         private VertexBuffer _solidVertexBuffer;
@@ -44,6 +44,8 @@ namespace TechCraftEngine.WorldEngine
         private VertexPositionTextureShade[] _solidVertexArray;
         private VertexPositionTextureShade[] _modelVertexArray;
         private VertexPositionTextureShade[] _waterVertexArray;
+
+        private const int MAPHEIGHT = 12;
 
         private Vector3 _worldCenter;
         public Vector3 Center
@@ -68,7 +70,9 @@ namespace TechCraftEngine.WorldEngine
             _position = position;
             _regionMngr = new RegionManager(this);
 
-            Blocks = new BlockType[WorldSettings.REGIONWIDTH, WorldSettings.REGIONHEIGHT, WorldSettings.REGIONLENGTH];
+            // Create the block array
+            Blocks = new Block[WorldSettings.REGIONWIDTH, WorldSettings.REGIONHEIGHT, WorldSettings.REGIONLENGTH];
+
             _faceInfo = new byte[WorldSettings.REGIONWIDTH, WorldSettings.REGIONHEIGHT, WorldSettings.REGIONLENGTH];
             _world = world;
 
@@ -97,7 +101,8 @@ namespace TechCraftEngine.WorldEngine
                 {
                     for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
                     {
-                        Blocks[x, y, z] = BlockType.None;
+                        Blocks[x, y, z] = new Block();
+                        Blocks[x, y, z].BlockType = BlockType.None;
                         _faceInfo[x, y, z] = 0;
                     }
                 }
@@ -123,7 +128,26 @@ namespace TechCraftEngine.WorldEngine
         public void Build()
         {
             BuildVertexBuffers();
+            ResetInactiveBlocks();
             _dirty = false;
+        }
+
+        private void ResetInactiveBlocks()
+        {
+            for (int x = 0; x < WorldSettings.REGIONWIDTH; x++)
+            {
+                for (int y = 0; y < WorldSettings.REGIONHEIGHT; y++)
+                {
+                    for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
+                    {
+                        Block block = Blocks[x, y, z];
+                        if (!block.IsActive)
+                        {
+                            block.BlockType = BlockType.None;
+                        }
+                    }
+                }
+            }
         }
 
         public VertexBuffer SolidVertexBuffer
@@ -154,11 +178,13 @@ namespace TechCraftEngine.WorldEngine
             _modelIndex = 0;
             for (int x = 0; x < WorldSettings.REGIONWIDTH; x++)
             {
-                for (int y = 0; y < WorldSettings.REGIONHEIGHT; y++)
+                for (int y = 0; y < _world.CURRENTMAPLEVEL; y++)
                 {
                     for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
                     {
-                        BlockType blockType = Blocks[x, y, z];
+                        BlockType blockType = Blocks[x, y, z].BlockType;
+                        Blocks[x, y, z].IsActive = true;
+
                         if (blockType != BlockType.None)
                         {
                             byte faceInfo = _faceInfo[x, y, z];
@@ -175,6 +201,8 @@ namespace TechCraftEngine.WorldEngine
                             {
                                 BuildBlockVertices(_solidVertexArray, Buffer.Solid, blockType, faceInfo, position);
                             }
+
+                            
                         }
                     }
                 }
@@ -357,7 +385,18 @@ namespace TechCraftEngine.WorldEngine
             return vertex;
         }
 
-        public BlockType BlockAt(int x, int y, int z)
+        public bool IsBlockActive(int x, int y, int z)
+        {
+            return Blocks[x, y, z].IsActive;
+        }
+
+
+        public BlockType BlockTypeAt(int x, int y, int z)
+        {
+            return Blocks[x, y, z].BlockType;
+        }
+
+        public Block BlockAt(int x, int y, int z)
         {
             return Blocks[x, y, z];
         }
@@ -371,21 +410,22 @@ namespace TechCraftEngine.WorldEngine
         {
             if (_world.InWorldBounds(x, y, z))
             {
-                Blocks[x, y, z] = blockType;
+                Blocks[x, y, z].BlockType = blockType;
+
                 _faceInfo[x, y, z] = 0;
                 Vector3i position = new Vector3i(_position.x + x, _position.y + y, _position.z + z);
 
-                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z);
-                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z);
-                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z);
-                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z);
-                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1);
-                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1);
+                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z).BlockType;
+                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z).BlockType;
+                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z).BlockType;
+                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z).BlockType;
+                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1).BlockType;
+                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1).BlockType;
 
                 SetBlockFaces(blockType, position.x, position.y, position.z, xDecreasing, position.x - 1, position.y, position.z, BlockFaceDirection.XDecreasing, BlockFaceDirection.XIncreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, xIncreasing, position.x + 1, position.y, position.z, BlockFaceDirection.XIncreasing, BlockFaceDirection.XDecreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, yDecreasing, position.x, position.y - 1, position.z, BlockFaceDirection.YDecreasing, BlockFaceDirection.YIncreasing);
-                SetBlockFaces(blockType, position.x, position.y, position.z, yIncreasing, position.x, position.y + 1, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
+   /* ?? */     SetBlockFaces(blockType, position.x, position.y, position.z, yIncreasing, position.x, position.y + 1, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, zDecreasing, position.x, position.y, position.z - 1, BlockFaceDirection.ZDecreasing, BlockFaceDirection.ZIncreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, zIncreasing, position.x, position.y, position.z + 1, BlockFaceDirection.ZIncreasing, BlockFaceDirection.ZDecreasing);
                 _dirty = true;
@@ -396,15 +436,15 @@ namespace TechCraftEngine.WorldEngine
         {
             if (_world.InWorldBounds(x, y, z))
             {
-                BlockType blockType = Blocks[x, y, z];
-                Blocks[x, y, z] = BlockType.None;
+                BlockType blockType = Blocks[x, y, z].BlockType;
+                Blocks[x, y, z].BlockType = BlockType.None;
                 Vector3i position = new Vector3i(_position.x + x, _position.y + y, _position.z + z);
-                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z);
-                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z);
-                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z);
-                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z);
-                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1);
-                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1);
+                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z).BlockType;
+                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z).BlockType;
+                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z).BlockType;
+                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z).BlockType;
+                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1).BlockType;
+                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1).BlockType;
                 SetBlockFaces(xDecreasing, position.x - 1, position.y, position.z, BlockType.None, position.x, position.y, position.z, BlockFaceDirection.XIncreasing, BlockFaceDirection.XDecreasing);
                 SetBlockFaces(xIncreasing, position.x + 1, position.y, position.z, BlockType.None, position.x, position.y, position.z, BlockFaceDirection.XDecreasing, BlockFaceDirection.XIncreasing);
                 SetBlockFaces(yDecreasing, position.x, position.y - 1, position.z, BlockType.None, position.x, position.y, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
@@ -587,6 +627,10 @@ namespace TechCraftEngine.WorldEngine
                         _world.RemoveModelFace(bx, by, bz, bFace);
                         _world.AddSolidFace(nx, ny, nz, nFace);
                     }
+                    else if (bFace == BlockFaceDirection.YIncreasing && by == _world.CURRENTMAPLEVEL - 1)
+                    {
+                        _world.AddSolidFace(bx, by, bz, bFace);
+                    }
                     else
                     {
                         // Both faces hidden
@@ -696,7 +740,7 @@ namespace TechCraftEngine.WorldEngine
                     for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
                     {
                         {
-                            Blocks[x, y, z] = BlockType.None;
+                            Blocks[x, y, z].BlockType = BlockType.None;
                         }
                     }
                 }

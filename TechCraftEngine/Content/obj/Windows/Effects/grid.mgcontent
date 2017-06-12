@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/Effects/grid.x</SourceFile>
+  <SourceFile>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/grid.x</SourceFile>
   <SourceTime>2011-02-27T13:01:08+01:00</SourceTime>
-  <DestFile>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/bin/Windows/Effects/grid.xnb</DestFile>
-  <DestTime>2017-06-08T17:25:08.2307436+02:00</DestTime>
+  <DestFile>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/bin/Windows/Effects/grid.xnb</DestFile>
+  <DestTime>2017-06-10T10:25:08.3429285+02:00</DestTime>
   <Importer>XImporter</Importer>
   <ImporterTime>2017-03-01T16:05:36+01:00</ImporterTime>
   <Processor>ModelProcessor</Processor>
@@ -66,7 +66,7 @@
   </Parameters>
   <Dependencies />
   <BuildAsset>
-    <string>H:/Projects/MonoGame/ProjectDacia_TechCraftEngine/TechCraftEngine/Content/bin/Windows/Effects/checker_0.xnb</string>
+    <string>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/bin/Windows/Effects/checker_0.xnb</string>
   </BuildAsset>
   <BuildOutput />
 </PipelineBuildEvent>

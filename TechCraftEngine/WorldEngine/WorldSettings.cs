@@ -24,8 +24,6 @@ namespace TechCraftEngine.WorldEngine
         public const int MAPHEIGHT = 128;
         public const int MAPLENGTH = 16*10;
 
-        public const int CURRENTMAPLEVEL = 1;
-
         public const int REGIONWIDTH = 16;
         public const int REGIONHEIGHT = 128;
         public const int REGIONLENGTH = 16;        
@@ -52,7 +50,7 @@ namespace TechCraftEngine.WorldEngine
         public const int MISSILEEXPLOSIONRADIUS = 2;
         public const int MAXGAMERS = 16;
         public const int TEXTUREATLASSIZE = 8;
-
+        
         private Texture2D _textureSet;
         private VertexDeclaration _vertexDeclaration;
         private TechCraftGame _game;

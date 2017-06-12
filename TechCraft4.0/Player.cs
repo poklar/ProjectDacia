@@ -178,10 +178,18 @@ namespace TechCraft
                 //}
             }
 
-           //Camera.LookAt(new Vector3(0.3f, -150f, 0.3f));
-            //Debug.WriteLine("lookat: " + lookat);
-
-
+            if (_game.InputState.IsKeyPressed(Keys.Up, _game.ActivePlayerIndex, out controlIndex))
+            {
+                _world.CURRENTMAPLEVEL++;
+                _world.BuildRegions();
+                _world.Draw(gameTime, IsUnderWater);
+            }
+            if (_game.InputState.IsKeyPressed(Keys.Down, _game.ActivePlayerIndex, out controlIndex))
+            {
+                _world.CURRENTMAPLEVEL--;
+                _world.BuildRegions();
+                _world.Draw(gameTime, IsUnderWater);
+            }
 
             UpdatePosition(gameTime);
 
@@ -215,13 +223,13 @@ namespace TechCraft
                     //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                     index = new BlockIndex(ray.Direction * distance + ray.Position);
 
-                    BlockType blockType = _world.BlockAtPoint(index.Position);
+                    BlockType blockType = _world.BlockTypeAtPoint(index.Position);
                     if (blockType != BlockType.None && blockType != BlockType.Water)
                     {
                         if (index.Position.Y > 2)
                         {
                             // Can't dig water or lava
-                            BlockType targetType = _world.BlockAtPoint(index.Position);
+                            BlockType targetType = _world.BlockTypeAtPoint(index.Position);
                             if (BlockInformation.IsDiggable(targetType))
                             {
                                 _world.RemoveBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z);
@@ -239,7 +247,7 @@ namespace TechCraft
                 for (float x = 0.5f; x < 5f; x += 0.2f)
                 {
                     Vector3 targetPoint = Camera.Position + (_lookVector * x);
-                    if (_world.BlockAtPoint(targetPoint) != BlockType.None)
+                    if (_world.BlockTypeAtPoint(targetPoint) != BlockType.None)
                     {
                         Random r = new Random();
                         for (ushort dy = (ushort)(targetPoint.Y - 3); dy < (ushort)(targetPoint.Y + 3); dy++)
@@ -267,7 +275,7 @@ namespace TechCraft
                 {
                     //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                     index = new BlockIndex(ray.Direction * distance + ray.Position);
-                    if (_world.BlockAtPoint(index.Position) != BlockType.None)
+                    if (_world.BlockTypeAtPoint(index.Position) != BlockType.None)
                     {
                         hit = x;
                         break;
@@ -280,7 +288,7 @@ namespace TechCraft
                     {
                         //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                         index = new BlockIndex(ray.Direction * distance + ray.Position);
-                        if (_world.BlockAtPoint(index.Position) == BlockType.None)
+                        if (_world.BlockTypeAtPoint(index.Position) == BlockType.None)
                         {
                             _world.AddBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z, _state.BlockPicker.SelectedBlockType, true, true);
                             break;
@@ -296,7 +304,7 @@ namespace TechCraft
         {
             get
             {
-                return (_world.BlockAtPoint(_game.Camera.Position) == BlockType.Water);
+                return (_world.BlockTypeAtPoint(_game.Camera.Position) == BlockType.Water);
             }
         }
 
@@ -464,51 +472,21 @@ namespace TechCraft
 
                 Vector3 target = Camera.Position + (_lookVector * distance);
 
-                BlockType blockType = _world.BlockAtPoint(index.Position);
+                Block block = _world.BlockAt((int) index.Position.X, (int) index.Position.Y, (int) index.Position.Z);
 
-                if (blockType == BlockType.None)
-                    AimedEmptyBlock = new PositionedBlock(new Vector3i(index.Position), blockType);
-                else
+                if (block != null)
                 {
-                    AimedSolidBlock = new PositionedBlock(new Vector3i(index.Position), blockType);
-                    //Debug.WriteLine("Target: " + target + " | Distance: " + index.Position);
-                    return;
+                    if (block.BlockType == BlockType.None)
+                        AimedEmptyBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
+                    else if (block.IsActive)
+                    {
+                        AimedSolidBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
+                        return;
+                    }
+                    
                 }
                 distance += 0.2f;
             }
-
-            //float? distance = _world.IntersectsRegion(ray);
-            //Vector3? pos = null;
-            //float? intersection = _world.IntersectsRegion(ray);
-
-            /*if (distance != null)
-            {
-                Debug.WriteLine("distance: " + distance);
-
-                pos = ray.Position + (distance * ray.Direction);
-                Debug.WriteLine("pos: " + pos);
-
-
-
-                //for (float x = 0.5f; x < 8f; x += 0.1f)
-                for (float x = 0.5f; x < 100f; x += 0.1f)
-                {
-                    Vector3 target = Camera.Position + (_lookVector * x);
-
-                    BlockType blockType = _world.BlockAtPoint((Vector3) pos);
-               
-                    if (blockType == BlockType.None)
-                        AimedEmptyBlock = new PositionedBlock(new Vector3i((Vector3) pos), blockType);
-                    else
-                    {
-                        AimedSolidBlock = new PositionedBlock(new Vector3i((Vector3) pos), blockType);
-                        Debug.WriteLine("Target: " + target);
-                        return;
-                    }
-
-                    distance++;
-                }
-            }*/
 
             AimedSolidBlock = null;
         }
@@ -545,9 +523,9 @@ namespace TechCraft
             }
 
             // It's solid there, so while we can't move we have officially collided with it.
-            BlockType lowerBlock = _world.BlockAtPoint(lowerBodyPoint);
-            BlockType midBlock = _world.BlockAtPoint(midBodyPoint);
-            BlockType upperBlock = _world.BlockAtPoint(movePosition);
+            BlockType lowerBlock = _world.BlockTypeAtPoint(lowerBodyPoint);
+            BlockType midBlock = _world.BlockTypeAtPoint(midBodyPoint);
+            BlockType upperBlock = _world.BlockTypeAtPoint(movePosition);
 
             // It's solid there, so see if it's a lava block. If so, touching it will kill us!
             //if (upperBlock == BlockType.Lava || lowerBlock == BlockType.Lava || midBlock == BlockType.Lava)
