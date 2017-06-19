@@ -1,0 +1,12 @@
+# Ignore `bin` dir
+bin/
+# or
+*/bin/*
+
+# Ignore `obj` dir
+obj/
+# or
+*/obj/*
+
+# Ignore `.vs` dir
+.vs/
