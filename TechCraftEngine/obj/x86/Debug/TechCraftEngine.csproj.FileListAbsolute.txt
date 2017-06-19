@@ -72,3 +72,4 @@ H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraftEngine\bin\Windows\x8
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraftEngine\obj\x86\Debug\TechCraftEngine.csprojResolveAssemblyReference.cache
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraftEngine\obj\x86\Debug\TechCraftEngine.dll
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraftEngine\obj\x86\Debug\TechCraftEngine.pdb
+H:\Projects\MonoGame\ProjectDacia\TechCraftEngine\bin\Windows\x86\Debug\Content\Fonts\debug.xnb

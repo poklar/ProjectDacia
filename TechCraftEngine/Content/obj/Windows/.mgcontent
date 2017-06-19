@@ -17,5 +17,6 @@
     <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Effects/WaterBlockEffect.fx</File>
     <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Textures/tileSelector.png</File>
     <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Textures/tileStrip.png</File>
+    <File>H:/Projects/MonoGame/ProjectDacia/TechCraftEngine/Content/Fonts/debug.spritefont</File>
   </SourceFiles>
 </SourceFileCollection>

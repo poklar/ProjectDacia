@@ -130,3 +130,4 @@ H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraft4.0\bin\Windows\x86\D
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraft4.0\bin\Windows\x86\Debug\SharpDX.XInput.xml
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraft4.0\bin\Windows\x86\Debug\SharpDX.Direct3D9.xml
 H:\Projects\MonoGame\ProjectDacia_TechCraftEngine\TechCraft4.0\obj\x86\Debug\TechCraft4.0.csprojResolveAssemblyReference.cache
+H:\Projects\MonoGame\ProjectDacia\TechCraft4.0\bin\Windows\x86\Debug\Content\Fonts\debug.xnb

@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using TechCraftEngine.WorldEngine.Generators;
 using System.Diagnostics;
+using TechCraftEngine.Common;
 
 namespace TechCraftEngine.WorldEngine
 {
@@ -28,7 +29,7 @@ namespace TechCraftEngine.WorldEngine
 
         // Rendering statistics
         private int _regionsDrawn;
-        private int _currentMapLevel = 20;
+        private int _currentMapLevel = 128;
         //private int _regionsBuilt;
         //private int _polysDrawn;
 
@@ -49,6 +50,12 @@ namespace TechCraftEngine.WorldEngine
             //_blockNone = new Block(BlockType.None);
         }
 
+        /// <summary>
+        /// Gets or sets the current map level.
+        /// </summary>
+        /// <value>
+        /// The current map level.
+        /// </value>
         public int CURRENTMAPLEVEL
         {
             get { return _currentMapLevel; }
@@ -181,13 +188,15 @@ namespace TechCraftEngine.WorldEngine
                                 if (region.SolidVertexBuffer != null)
                                 {
                                     _regionsDrawn++;
+
+                                    //string debugOutput = ;
+                                    DebugInfo.Data = "region vertex buffer: " + region.SolidVertexBuffer.VertexCount;
                                 
                                     
                                     //_game.GraphicsDevice.Vertices[0].SetSource(region.SolidVertexBuffer, 0, VertexPositionTextureShade.SizeInBytes);
                                     _game.GraphicsDevice.SetVertexBuffer(region.SolidVertexBuffer); 
                                     //_game.GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, (region.SolidVertexBuffer.SizeInBytes / VertexPositionTextureShade.SizeInBytes) / 3);
                                     _game.GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, region.SolidVertexBuffer.VertexCount  / 3);
-                                
                                 }
                             }
                         }
@@ -195,7 +204,6 @@ namespace TechCraftEngine.WorldEngine
                 }
                 //pass.End();
             }
-            Debug.WriteLine("regions: " + _regionsDrawn);
             //_solidBlockEffect.End();
             
             /*if (!underWater)
@@ -277,7 +285,7 @@ namespace TechCraftEngine.WorldEngine
         public void RemoveBlock(int x, int y, int z) {
             Region region = _regions[x / WorldSettings.REGIONWIDTH, y / WorldSettings.REGIONHEIGHT, z / WorldSettings.REGIONLENGTH];
             BlockType blockType = region.RemoveBlock(x % WorldSettings.REGIONWIDTH, y % WorldSettings.REGIONHEIGHT, z % WorldSettings.REGIONLENGTH);
-            _waterQueue.Enqueue(new Flow(x, y, z,WorldSettings.WATERFLOWDISTANCE));
+            _waterQueue.Enqueue(new Flow(x, y, z, WorldSettings.WATERFLOWDISTANCE));
             //_lavaQueue.Enqueue(new Flow(x, y, z, WorldSettings.LAVAFLOWDISTANCE));
             _lighting.BlockRemoved(blockType, x, y, z);
         }
@@ -407,6 +415,65 @@ namespace TechCraftEngine.WorldEngine
             {
                 _lighting.BlockAdded(blockType, x, y, z);
             }
+        }
+
+        public void AddFloor()
+        {
+            for (int x = 0; x < REGIONRATIOWIDTH; x++)
+            {
+                for (int y = 0; y < REGIONRATIOHEIGHT; y++)
+                {
+                    for (int z = 0; z < REGIONRATIOLENGTH; z++)
+                    {
+                        Dictionary<Vector3i, BlockType> blockInfo = new Dictionary<Vector3i, BlockType>();
+                        Region region = _regions[x, y, z];
+
+                        region.AddFloor(blockInfo);
+
+                        if (blockInfo.Count != 0)
+                        {
+                            foreach (KeyValuePair<Vector3i, BlockType> item in blockInfo)
+                            {
+                                BlockType blockType = item.Value;
+                                Vector3i position = item.Key;
+
+                                _lighting.BlockAdded(blockType, position.x, position.y, position.z);
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        public void RemoveFloor()
+        {
+            for (int x = 0; x < REGIONRATIOWIDTH; x++)
+            {
+                for (int y = 0; y < REGIONRATIOHEIGHT; y++)
+                {
+                    for (int z = 0; z < REGIONRATIOLENGTH; z++)
+                    {
+                        Dictionary<Vector3i, BlockType> blockInfo = new Dictionary<Vector3i, BlockType>();
+                        Region region = _regions[x, y, z];
+
+                        region.RemoveFloor(blockInfo);
+
+                        if (blockInfo.Count != 0)
+                        {
+                            foreach (KeyValuePair<Vector3i, BlockType> item in blockInfo)
+                            {
+                                BlockType blockType = item.Value;
+                                Vector3i position = item.Key;
+                                
+                                _lighting.BlockRemoved(blockType, position.x, position.y, position.z);
+                            }
+                        }
+
+                    }
+                }
+            }
+
         }
 
         public BlockType BlockTypeAtPoint(Vector3 position) {

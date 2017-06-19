@@ -127,8 +127,8 @@ namespace TechCraftEngine.WorldEngine
 
         public void Build()
         {
+            //ResetInactiveBlocks();
             BuildVertexBuffers();
-            ResetInactiveBlocks();
             _dirty = false;
         }
 
@@ -425,7 +425,7 @@ namespace TechCraftEngine.WorldEngine
                 SetBlockFaces(blockType, position.x, position.y, position.z, xDecreasing, position.x - 1, position.y, position.z, BlockFaceDirection.XDecreasing, BlockFaceDirection.XIncreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, xIncreasing, position.x + 1, position.y, position.z, BlockFaceDirection.XIncreasing, BlockFaceDirection.XDecreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, yDecreasing, position.x, position.y - 1, position.z, BlockFaceDirection.YDecreasing, BlockFaceDirection.YIncreasing);
-   /* ?? */     SetBlockFaces(blockType, position.x, position.y, position.z, yIncreasing, position.x, position.y + 1, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
+                SetBlockFaces(blockType, position.x, position.y, position.z, yIncreasing, position.x, position.y + 1, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, zDecreasing, position.x, position.y, position.z - 1, BlockFaceDirection.ZDecreasing, BlockFaceDirection.ZIncreasing);
                 SetBlockFaces(blockType, position.x, position.y, position.z, zIncreasing, position.x, position.y, position.z + 1, BlockFaceDirection.ZIncreasing, BlockFaceDirection.ZDecreasing);
                 _dirty = true;
@@ -458,6 +458,94 @@ namespace TechCraftEngine.WorldEngine
             {
                 return BlockType.None;
             }
+        }
+
+        // TODO: Temporary hack, needs to be removed/fixed and optimized!
+        public void AddBlockFloor(int x, int y, int z, BlockType blockType)
+        {
+            if (_world.InWorldBounds(x, y, z))
+            {
+                Blocks[x, y, z].BlockType = blockType;
+
+                _faceInfo[x, y, z] = 0;
+                Vector3i position = new Vector3i(_position.x + x, _position.y + y, _position.z + z);
+
+                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z).BlockType;
+                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z).BlockType;
+                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z).BlockType;
+                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z).BlockType;
+                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1).BlockType;
+                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1).BlockType;
+
+                AddBlockFaces(blockType, position.x, position.y, position.z, xDecreasing, position.x - 1, position.y, position.z, BlockFaceDirection.XDecreasing, BlockFaceDirection.XIncreasing);
+                AddBlockFaces(blockType, position.x, position.y, position.z, xIncreasing, position.x + 1, position.y, position.z, BlockFaceDirection.XIncreasing, BlockFaceDirection.XDecreasing);
+                AddBlockFaces(blockType, position.x, position.y, position.z, yDecreasing, position.x, position.y - 1, position.z, BlockFaceDirection.YDecreasing, BlockFaceDirection.YIncreasing);
+                AddBlockFaces(blockType, position.x, position.y, position.z, yIncreasing, position.x, position.y + 1, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
+                AddBlockFaces(blockType, position.x, position.y, position.z, zDecreasing, position.x, position.y, position.z - 1, BlockFaceDirection.ZDecreasing, BlockFaceDirection.ZIncreasing);
+                AddBlockFaces(blockType, position.x, position.y, position.z, zIncreasing, position.x, position.y, position.z + 1, BlockFaceDirection.ZIncreasing, BlockFaceDirection.ZDecreasing);
+                _dirty = true;
+            }
+        }
+
+        // TODO: Temporary hack, needs to be removed/fixed and optimized!
+        public BlockType RemoveBlockFloor(int x, int y, int z)
+        {
+            if (_world.InWorldBounds(x, y, z))
+            {
+                BlockType blockType = Blocks[x, y, z].BlockType;
+                //Blocks[x, y, z].BlockType = BlockType.None;
+                Vector3i position = new Vector3i(_position.x + x, _position.y + y, _position.z + z);
+                BlockType xDecreasing = _world.BlockAt(position.x - 1, position.y, position.z).BlockType;
+                BlockType xIncreasing = _world.BlockAt(position.x + 1, position.y, position.z).BlockType;
+                BlockType yDecreasing = _world.BlockAt(position.x, position.y - 1, position.z).BlockType;
+                BlockType yIncreasing = _world.BlockAt(position.x, position.y + 1, position.z).BlockType;
+                BlockType zDecreasing = _world.BlockAt(position.x, position.y, position.z - 1).BlockType;
+                BlockType zIncreasing = _world.BlockAt(position.x, position.y, position.z + 1).BlockType;
+                RemoveBlockFaces(xDecreasing, position.x - 1, position.y, position.z, xDecreasing, position.x, position.y, position.z, BlockFaceDirection.XIncreasing, BlockFaceDirection.XDecreasing);
+                RemoveBlockFaces(xIncreasing, position.x + 1, position.y, position.z, xIncreasing, position.x, position.y, position.z, BlockFaceDirection.XDecreasing, BlockFaceDirection.XIncreasing);
+                RemoveBlockFaces(yDecreasing, position.x, position.y - 1, position.z, yDecreasing, position.x, position.y, position.z, BlockFaceDirection.YIncreasing, BlockFaceDirection.YDecreasing);
+                RemoveBlockFaces(yIncreasing, position.x, position.y + 1, position.z, yIncreasing, position.x, position.y, position.z, BlockFaceDirection.YDecreasing, BlockFaceDirection.YIncreasing);
+                RemoveBlockFaces(zDecreasing, position.x, position.y, position.z - 1, zDecreasing, position.x, position.y, position.z, BlockFaceDirection.ZIncreasing, BlockFaceDirection.ZDecreasing);
+                RemoveBlockFaces(zIncreasing, position.x, position.y, position.z + 1, zIncreasing, position.x, position.y, position.z, BlockFaceDirection.ZDecreasing, BlockFaceDirection.ZIncreasing);
+                _dirty = true;
+                return blockType;
+            }
+            else
+            {
+                return BlockType.None;
+            }
+        }
+
+        public Dictionary<Vector3i, BlockType> AddFloor(Dictionary<Vector3i, BlockType> blockInfo)
+        {
+            for (int x = 0; x < WorldSettings.REGIONWIDTH; x++)
+            {
+                for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
+                {
+                    BlockType blockType = Blocks[x, _world.CURRENTMAPLEVEL, z].BlockType;
+                    //AddBlock(x, _world.CURRENTMAPLEVEL, z, blockType);
+                    AddBlockFloor(x, _world.CURRENTMAPLEVEL, z, blockType);
+                    blockInfo.Add(new Vector3i(x, _world.CURRENTMAPLEVEL, z), blockType);
+                }
+            }
+
+            return blockInfo;
+        }
+
+        public Dictionary<Vector3i, BlockType> RemoveFloor(Dictionary<Vector3i, BlockType> blockInfo)
+        {
+            for (int x = 0; x < WorldSettings.REGIONWIDTH; x++)
+            {
+                for (int z = 0; z < WorldSettings.REGIONLENGTH; z++)
+                {
+                    BlockType blockType = RemoveBlockFloor(x, _world.CURRENTMAPLEVEL, z);
+                    //BlockType blockType = RemoveBlock(x, _world.CURRENTMAPLEVEL, z);
+                    
+                    blockInfo.Add(new Vector3i(x, _world.CURRENTMAPLEVEL, z), blockType);
+                }
+            }
+
+            return blockInfo;
         }
 
         public void AddWaterFace(int x, int y, int z, BlockFaceDirection face)
@@ -519,6 +607,48 @@ namespace TechCraftEngine.WorldEngine
                 _dirty = true;
             }
         }
+
+        // TODO: Temporary hack, needs to be removed/fixed and optimized!
+        private void AddBlockFaces(BlockType blockType, int bx, int by, int bz, BlockType neighbourType, int nx, int ny, int nz, BlockFaceDirection bFace, BlockFaceDirection nFace)
+        {
+            if (neighbourType == BlockType.None)
+            {
+                // Bordering sky make face visible
+                if (blockType != BlockType.None)
+                {
+                    _world.AddSolidFace(bx, by, bz, bFace);
+                }
+            }
+            else
+            {
+                if (blockType != BlockType.None && bFace == BlockFaceDirection.YIncreasing)
+                {
+                    _world.AddSolidFace(bx, by, bz, bFace);
+                    _world.RemoveSolidFace(nx, ny, nz, nFace);
+                }
+                else
+                {
+                    _world.RemoveSolidFace(bx, by, bz, bFace);
+                    _world.RemoveSolidFace(nx, ny, nz, nFace);
+                }
+            }
+        }
+
+        // TODO: Temporary hack, needs to be removed/fixed and optimized!
+        private void RemoveBlockFaces(BlockType blockType, int bx, int by, int bz, BlockType neighbourType, int nx, int ny, int nz, BlockFaceDirection bFace, BlockFaceDirection nFace)
+        {
+            if (blockType != BlockType.None && bFace == BlockFaceDirection.YIncreasing)
+            {
+                _world.AddSolidFace(bx, by, bz, bFace);
+                _world.RemoveSolidFace(nx, ny, nz, nFace);
+            }
+            else if(blockType != BlockType.None && bFace != BlockFaceDirection.YIncreasing)
+            {
+                _world.RemoveSolidFace(bx, by, bz, bFace);
+                _world.RemoveSolidFace(nx, ny, nz, nFace);
+            }
+        }
+
         private void SetBlockFaces(BlockType blockType, int bx, int by, int bz, BlockType neighbourType, int nx, int ny, int nz, BlockFaceDirection bFace, BlockFaceDirection nFace)
         {
             if (neighbourType == BlockType.None)
