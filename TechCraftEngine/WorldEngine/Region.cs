@@ -516,6 +516,11 @@ namespace TechCraftEngine.WorldEngine
             }
         }
 
+        /// <summary>
+        /// Adds a floor.
+        /// </summary>
+        /// <param name="blockInfo">The block information, containing position and blocktype.</param>
+        /// <returns></returns>
         public Dictionary<Vector3i, BlockType> AddFloor(Dictionary<Vector3i, BlockType> blockInfo)
         {
             for (int x = 0; x < WorldSettings.REGIONWIDTH; x++)
