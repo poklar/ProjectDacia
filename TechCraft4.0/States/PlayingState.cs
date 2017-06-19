@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Media;
 
 using TechCraftEngine;
 using TechCraftEngine.Cameras;
+using TechCraftEngine.Common;
 using TechCraftEngine.Components;
 using TechCraftEngine.Controllers;
 using TechCraftEngine.Managers;
@@ -30,6 +31,7 @@ namespace TechCraft.States
         private IsometricCamera _isoCamera;
         private ParticleManager _particleManager;
         private WeaponManager _weaponManager;
+        private DebugInfo _debugInfo;
 
         private Player _player;
         private Texture2D _crosshairTexture;
@@ -56,11 +58,6 @@ namespace TechCraft.States
             _cameraController.Initialize();
             Game.Camera = _camera;
 
-            _isoCamera = new IsometricCamera(Game, new Vector3(30f, 100f, 30f), 0.0f, 0.0f);
-            _isoCamera.Initialize();
-            _isoCamera.Position = Vector3.Zero;
-            //Game.Camera = _isoCamera;
-
             Game.IsMouseVisible = true;
 
             _player = new Player(Game, this, _game.GameClient.World, new Vector3(30f, 100f, 30f));
@@ -79,6 +76,9 @@ namespace TechCraft.States
 
             _spriteFont = Game.Content.Load<SpriteFont>("Fonts\\console");
 
+            _debugInfo = new DebugInfo(Game, _game.GameClient.World);
+
+
             _particleManager.ParticleEmitters.Add(new ParticleEmitter(_particleManager.ParticleSystems[0], 50, new Vector3(5,3,5)));
             _particleManager.ParticleEmitters.Add(new ParticleEmitter(_particleManager.ParticleSystems[0], 50, new Vector3(15,3, 15)));
 
@@ -96,6 +96,7 @@ namespace TechCraft.States
         {
             _blockPicker.LoadContent();
             _player.LoadContent();
+            _debugInfo.LoadContent();
             _crosshairTexture = Game.Content.Load<Texture2D>("Textures\\crosshair");
             _underWaterTexture = Game.Content.Load<Texture2D>("Textures\\underwater");
             //_weaponManager.LoadContent();
@@ -116,6 +117,7 @@ namespace TechCraft.States
             _cameraController.Update(gameTime);
             Game.Camera.Update(gameTime);
             _player.Update(gameTime);
+            _debugInfo.Update(gameTime);
             _game.GameClient.World.Update(gameTime);
             _blockPicker.Update(gameTime);
             //_weaponManager.Update(gameTime);
@@ -126,6 +128,7 @@ namespace TechCraft.States
             _game.GraphicsDevice.Clear(Color.SkyBlue);
             _game.GameClient.World.Draw(gameTime,_player.IsUnderWater);
             _player.Draw(gameTime);
+            _debugInfo.Draw(gameTime);
 
             //_weaponManager.Draw(gameTime);
 

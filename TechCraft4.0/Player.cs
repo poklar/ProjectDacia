@@ -181,14 +181,12 @@ namespace TechCraft
             if (_game.InputState.IsKeyPressed(Keys.Up, _game.ActivePlayerIndex, out controlIndex))
             {
                 _world.CURRENTMAPLEVEL++;
-                _world.BuildRegions();
-                _world.Draw(gameTime, IsUnderWater);
+                _world.AddFloor();
             }
             if (_game.InputState.IsKeyPressed(Keys.Down, _game.ActivePlayerIndex, out controlIndex))
             {
                 _world.CURRENTMAPLEVEL--;
-                _world.BuildRegions();
-                _world.Draw(gameTime, IsUnderWater);
+                _world.RemoveFloor();
             }
 
             UpdatePosition(gameTime);
@@ -544,7 +542,7 @@ namespace TechCraft
             //    return true;
             //}
 
-            return false;
+            return true;
         }
 
         public void Draw(GameTime gameTime)

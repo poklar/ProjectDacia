@@ -55,7 +55,7 @@ namespace TechCraftEngine.WorldEngine
         private VertexDeclaration _vertexDeclaration;
         private TechCraftGame _game;
 
-        public const String LEVELFOLDER = "c:\\";
+        public const string LEVELFOLDER = "c:\\";
 
         public WorldSettings(TechCraftGame game, Texture2D textureSet)
         {

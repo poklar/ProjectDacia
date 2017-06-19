@@ -48,6 +48,7 @@
     <Compile Include="Cameras\FirstPersonCamera.cs" />
     <Compile Include="Cameras\IsometricCamera.cs" />
     <Compile Include="Cameras\SimpleCamera.cs" />
+    <Compile Include="Common\DebugInfo.cs" />
     <Compile Include="Common\InputState.cs" />
     <Compile Include="Common\ObjectPool.cs" />
     <Compile Include="Common\RectangleF.cs" />
