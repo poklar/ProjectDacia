@@ -78,6 +78,7 @@
     <Compile Include="WorldEngine\BlockFaceDirection.cs" />
     <Compile Include="WorldEngine\BlockIndex.cs" />
     <Compile Include="WorldEngine\BlockInformation.cs" />
+    <Compile Include="WorldEngine\BlockSelection.cs" />
     <Compile Include="WorldEngine\BlockTexture.cs" />
     <Compile Include="WorldEngine\BlockType.cs" />
     <Compile Include="WorldEngine\BlockUtils.cs" />

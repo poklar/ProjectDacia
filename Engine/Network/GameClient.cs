@@ -23,6 +23,7 @@ namespace Engine.Network
         Ready,
         Connecting,
         Connected,
+        Building,
         Disconnected,
         Rejected,
         Loading,

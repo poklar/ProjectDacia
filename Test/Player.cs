@@ -24,6 +24,7 @@ namespace Test
     {
         private TechCraftGame _game;
         private World _world;
+        private BlockSelection _blockSelection;
         private Vector3 _position;
         private Vector3 _playerVelocity;
         private double _headBob;
@@ -38,17 +39,11 @@ namespace Test
         private bool _isAboveSnowline;
         private MouseState _previousMouseState;
 
-        private Model _aimedBlockModel;
-        private BasicEffect _aimedBlockEffect;
-        private Texture2D _aimedBlockTexture;
-
-        public PositionedBlock? AimedSolidBlock { get; private set; } // nullable object.        
-        public PositionedBlock? AimedEmptyBlock { get; private set; } // nullable object.  
-
-        public Player(TechCraftGame game, PlayingState state, World world, Vector3 startPosition)
+        public Player(TechCraftGame game, PlayingState state, World world, BlockSelection blockSelection, Vector3 startPosition)
         {
             _game = game;
             _world = world;
+            _blockSelection = blockSelection;
             _position = startPosition;
             _state = state;
         }
@@ -66,14 +61,6 @@ namespace Test
             }
         }
 
-        /*public IsometricCamera Camera
-        {
-            get
-            {
-                return (IsometricCamera)_game.Camera;
-            }
-        }*/
-
         public void Initialize()
         {
             _playerVelocity = Vector3.Zero;
@@ -82,7 +69,7 @@ namespace Test
             _snowParticleSystem = new SnowParticleSystem(_game, _game.Content);
             _snowParticleSystem.Initialize();
 
-            Camera.LeftRightRotation =  3.946f;
+            Camera.LeftRightRotation = 3.946f;
             Camera.UpDownRotation = -1.124f;
         }
 
@@ -95,10 +82,6 @@ namespace Test
             _bubbleSoundInstance.Play(); _bubbleSoundInstance.Pause();
             _bubbleSoundInstance.Volume = 0.2f;
             _bubbleSoundInstance.Pitch = -1f;
-
-            _aimedBlockModel = _game.Content.Load<Model>("Models\\AimedBlock");
-            _aimedBlockEffect = new BasicEffect(_game.GraphicsDevice);
-            _aimedBlockTexture = _game.Content.Load<Texture2D>("Textures\\AimedBlock");
         }
 
         Matrix _rotationMatrix;
@@ -239,7 +222,7 @@ namespace Test
                     distance += 0.2f;
                 }
                 distance = 0.0f;
-            }            
+            }
             if (_game.InputState.IsKeyPressed(Keys.V, _game.ActivePlayerIndex, out controlIndex))
             {
                 for (float x = 0.5f; x < 5f; x += 0.2f)
@@ -460,7 +443,7 @@ namespace Test
             float? intersect;
 
             Ray ray = GetMouseRay();
-            BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);            
+            BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);
 
             while (distance <= 100f)
             {
@@ -470,23 +453,23 @@ namespace Test
 
                 Vector3 target = Camera.Position + (_lookVector * distance);
 
-                Block block = _world.BlockAt((int) index.Position.X, (int) index.Position.Y, (int) index.Position.Z);
+                Block block = _world.BlockAt((int)index.Position.X, (int)index.Position.Y, (int)index.Position.Z);
 
                 if (block != null)
                 {
                     if (block.BlockType == BlockType.None)
-                        AimedEmptyBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
+                        _blockSelection.SetAimedBlock(new Vector3i(index.Position), block.BlockType, false);
                     else if (block.IsActive)
                     {
-                        AimedSolidBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
+                        _blockSelection.SetAimedBlock(new Vector3i(index.Position), block.BlockType, true);
                         return;
                     }
-                    
+
                 }
                 distance += 0.2f;
             }
 
-            AimedSolidBlock = null;
+            _blockSelection.AimedSolidBlock = null;
         }
 
         private Ray GetMouseRay()
@@ -552,45 +535,6 @@ namespace Test
                 _bubbleParticleSystem.Draw(gameTime);
             }
             _snowParticleSystem.Draw(gameTime);
-
-            if (AimedSolidBlock.HasValue) RenderAimedBlock();
-        }
-
-        private void RenderAimedBlock()
-        {
-            _game.GraphicsDevice.BlendState = BlendState.NonPremultiplied;
-            // allows any transparent pixels in original PNG to draw transparent
-            _game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-
-            var position = AimedSolidBlock.Value.Position.AsVector3() + new Vector3(0.5f, 0.5f, 0.5f);
-            Matrix matrix_a, matrix_b;
-            Matrix identity = Matrix.Identity; // setup the matrix prior to translation and scaling  
-            Matrix.CreateTranslation(ref position, out matrix_a);
-            // translate the position a half block in each direction
-            Matrix.CreateScale(0.505f, out matrix_b);
-            // scales the selection box slightly larger than the targetted block
-            identity = Matrix.Multiply(matrix_b, matrix_a); // the final position of the block
-
-            _aimedBlockEffect.World = identity;
-            _aimedBlockEffect.View = Camera.View;
-            _aimedBlockEffect.Projection = Camera.Projection;
-            _aimedBlockEffect.Texture = _aimedBlockTexture;
-            _aimedBlockEffect.TextureEnabled = true;
-
-            foreach (EffectPass pass in _aimedBlockEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-
-                for (int i = 0; i < _aimedBlockModel.Meshes[0].MeshParts.Count; i++)
-                {
-                    ModelMeshPart parts = _aimedBlockModel.Meshes[0].MeshParts[i];
-                    if (parts.NumVertices == 0) continue;
-
-                    _game.GraphicsDevice.Indices = parts.IndexBuffer;
-                    _game.GraphicsDevice.SetVertexBuffer(parts.VertexBuffer);
-                    _game.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, parts.PrimitiveCount);
-                }
-            }
         }
     }
 }
