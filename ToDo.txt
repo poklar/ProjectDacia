@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Engine:
 
 - Select multiple tiles
@@ -6,3 +7,13 @@ Engine:
 - Add collision detection ?
 - Fix floor selection 
  
+=======
+Engine:
+
+- Select multiple tiles
+- Change landscape
+- Move camera when mouse is at the edge of the screen
+- Add collision detection ?
+- Fix floor selection 
+
+>>>>>>> 2bb658c55ba0780b2f1ac5282615f60c094defb7
