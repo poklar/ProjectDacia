@@ -32,6 +32,7 @@ namespace Test.States
         private ParticleManager _particleManager;
         private WeaponManager _weaponManager;
         private DebugInfo _debugInfo;
+        private BlockSelection _blockSelection;
 
         private Player _player;
         private Texture2D _crosshairTexture;
@@ -60,7 +61,10 @@ namespace Test.States
 
             Game.IsMouseVisible = true;
 
-            _player = new Player(Game, this, _game.GameClient.World, new Vector3(30f, 100f, 30f));
+            _blockSelection = new BlockSelection(Game, _game.GameClient.World);
+            _blockSelection.Initialize();
+
+            _player = new Player(Game, this, _game.GameClient.World, _blockSelection, new Vector3(30f, 100f, 30f));
             _player.Initialize();
 
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
@@ -97,6 +101,7 @@ namespace Test.States
             _blockPicker.LoadContent();
             _player.LoadContent();
             _debugInfo.LoadContent();
+            _blockSelection.LoadContent();
             _crosshairTexture = Game.Content.Load<Texture2D>("Textures\\crosshair");
             _underWaterTexture = Game.Content.Load<Texture2D>("Textures\\underwater");
             //_weaponManager.LoadContent();
@@ -117,6 +122,7 @@ namespace Test.States
             _cameraController.Update(gameTime);
             Game.Camera.Update(gameTime);
             _player.Update(gameTime);
+            _blockSelection.Update(gameTime);
             _debugInfo.Update(gameTime);
             _game.GameClient.World.Update(gameTime);
             _blockPicker.Update(gameTime);
@@ -129,10 +135,11 @@ namespace Test.States
             _game.GameClient.World.Draw(gameTime,_player.IsUnderWater);
             _player.Draw(gameTime);
             _debugInfo.Draw(gameTime);
+            _blockSelection.Draw(gameTime);
 
             //_weaponManager.Draw(gameTime);
 
-           // _spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Immediate, SaveStateMode.SaveState);
+            // _spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Immediate, SaveStateMode.SaveState);
             _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend); 
 
             if (_player.IsUnderWater)
