@@ -38,6 +38,8 @@ namespace Test
         private bool _wasUnderwater;
         private bool _isAboveSnowline;
         private MouseState _previousMouseState;
+        private float _elapsedTime;
+        private bool _onBlockSlection;
 
         public Player(TechCraftGame game, PlayingState state, World world, BlockSelection blockSelection, Vector3 startPosition)
         {
@@ -71,6 +73,8 @@ namespace Test
 
             Camera.LeftRightRotation = 3.946f;
             Camera.UpDownRotation = -1.124f;
+            _elapsedTime = 0.0f;
+            _onBlockSlection = false;
         }
 
         public void LoadContent()
@@ -144,12 +148,10 @@ namespace Test
 
             UpdateParticles(gameTime);
             UpdateSounds();
-            FindAimedBlock();
 
             PlayerIndex controlIndex;
 
-            if (_game.InputState.IsButtonDown(Buttons.A, _game.ActivePlayerIndex, out controlIndex) ||
-                _game.InputState.IsKeyDown(Keys.Space, _game.ActivePlayerIndex, out controlIndex))
+            if (_game.InputState.IsKeyDown(Keys.Space, _game.ActivePlayerIndex, out controlIndex))
             {
                 Vector3 footPosition = _position + new Vector3(0f, -1.5f, 0f);
                 //XXX fly mode
@@ -170,6 +172,11 @@ namespace Test
             {
                 _world.CURRENTMAPLEVEL--;
                 _world.RemoveFloor();
+            }
+
+            if (_onBlockSlection)
+            {
+                _blockSelection.FindAimedBlock(_lookVector);
             }
 
             UpdatePosition(gameTime);
@@ -194,14 +201,16 @@ namespace Test
             Ray ray = GetMouseRay();
             BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);
 
-            if (_game.InputState.IsButtonPressed(Buttons.RightTrigger, _game.ActivePlayerIndex, out controlIndex) ||
-                _game.InputState.IsKeyPressed(Keys.Q, _game.ActivePlayerIndex, out controlIndex)
-                || (mouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed))
+            if (mouseState.LeftButton == ButtonState.Pressed)
             {
-                //for (float x = 0.5f; x < 5f; x += 0.2f)
+                // TODO: Add mouse startpostion 
+                _elapsedTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+            if (mouseState.LeftButton == ButtonState.Released && _previousMouseState.LeftButton != ButtonState.Released)
+            {
+                // TODO: Compare mouse start position and current position
                 for (float x = 0.5f; x < 100f; x += 0.2f)
                 {
-                    //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                     index = new BlockIndex(ray.Direction * distance + ray.Position);
 
                     BlockType blockType = _world.BlockTypeAtPoint(index.Position);
@@ -213,7 +222,12 @@ namespace Test
                             BlockType targetType = _world.BlockTypeAtPoint(index.Position);
                             if (BlockInformation.IsDiggable(targetType))
                             {
-                                _world.RemoveBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z);
+                                // If in selection mode
+                                if (_onBlockSlection)
+                                    OnBlockSelection(index.Position);
+                                // Else remove the block
+                                else
+                                    _world.RemoveBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z);
                             }
                         }
                         break;
@@ -222,62 +236,51 @@ namespace Test
                     distance += 0.2f;
                 }
                 distance = 0.0f;
+                _elapsedTime = 0.0f;
             }
-            if (_game.InputState.IsKeyPressed(Keys.V, _game.ActivePlayerIndex, out controlIndex))
+            if (mouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton != ButtonState.Pressed)
             {
-                for (float x = 0.5f; x < 5f; x += 0.2f)
+                if (_onBlockSlection)
                 {
-                    Vector3 targetPoint = Camera.Position + (_lookVector * x);
-                    if (_world.BlockTypeAtPoint(targetPoint) != BlockType.None)
-                    {
-                        Random r = new Random();
-                        for (ushort dy = (ushort)(targetPoint.Y - 3); dy < (ushort)(targetPoint.Y + 3); dy++)
-                        {
-                            for (ushort dx = (ushort)(targetPoint.X - 3); dx < (ushort)(targetPoint.X + 3); dx++)
-                            {
-                                for (ushort dz = (ushort)(targetPoint.Z - 3); dz < (ushort)(targetPoint.Z + 3); dz++)
-                                {
-                                    if (r.Next(3) == 0) _world.RemoveBlock(dx, dy, dz);
-                                }
-                            }
-                        }
-                        break;
-                    }
+                    _blockSelection.CancelSelection();
+                    _onBlockSlection = false;
                 }
-            }
-            if (_game.InputState.IsButtonPressed(Buttons.LeftTrigger, _game.ActivePlayerIndex, out controlIndex) ||
-                _game.InputState.IsKeyPressed(Keys.E, _game.ActivePlayerIndex, out controlIndex)
-                || (mouseState.RightButton == ButtonState.Pressed
-                && _previousMouseState.RightButton != ButtonState.Pressed))
-            {
-                float hit = 0;
-                //for (float x = 0.8f; x < 5f; x += 0.1f)
-                for (float x = 0.5f; x < 100f; x += 0.2f)
+                else
                 {
-                    //Vector3 targetPoint = Camera.Position + (_lookVector * x);
-                    index = new BlockIndex(ray.Direction * distance + ray.Position);
-                    if (_world.BlockTypeAtPoint(index.Position) != BlockType.None)
-                    {
-                        hit = x;
-                        break;
-                    }
-                    distance += 0.2f;
-                }
-                if (hit != 0)
-                {
-                    for (float x = hit; x > 0.7f; x -= 0.1f)
+
+                    float hit = 0;
+                    //for (float x = 0.8f; x < 5f; x += 0.1f)
+                    for (float x = 0.5f; x < 100f; x += 0.2f)
                     {
                         //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                         index = new BlockIndex(ray.Direction * distance + ray.Position);
-                        if (_world.BlockTypeAtPoint(index.Position) == BlockType.None)
+                        if (_world.BlockTypeAtPoint(index.Position) != BlockType.None)
                         {
-                            _world.AddBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z, _state.BlockPicker.SelectedBlockType, true, true);
+                            hit = x;
                             break;
                         }
-                        distance -= 0.1f;
+                        distance += 0.2f;
                     }
+                    if (hit != 0)
+                    {
+                        for (float x = hit; x > 0.7f; x -= 0.1f)
+                        {
+                            //Vector3 targetPoint = Camera.Position + (_lookVector * x);
+                            index = new BlockIndex(ray.Direction * distance + ray.Position);
+                            if (_world.BlockTypeAtPoint(index.Position) == BlockType.None)
+                            {
+                                _world.AddBlock((ushort)index.Position.X, (ushort)index.Position.Y, (ushort)index.Position.Z, _state.BlockPicker.SelectedBlockType, true, true);
+                                break;
+                            }
+                            distance -= 0.1f;
+                        }
+                    }
+                    distance = 0.0f;
                 }
-                distance = 0.0f;
+            }
+            if (_game.InputState.IsKeyDown(Keys.V, _game.ActivePlayerIndex, out controlIndex))
+            {
+                _onBlockSlection = true;
             }
         }
 
@@ -437,41 +440,6 @@ namespace Test
             else if (!TryToMoveTo(new Vector3(rotatedMoveVector.X, 0, 0), gameTime)) { }
         }
 
-        private void FindAimedBlock()
-        {
-            float distance = 0.0f;
-            float? intersect;
-
-            Ray ray = GetMouseRay();
-            BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);
-
-            while (distance <= 100f)
-            {
-                index = new BlockIndex(ray.Direction * distance + ray.Position);
-
-                intersect = index.GetBoundingBox().Intersects(ray);
-
-                Vector3 target = Camera.Position + (_lookVector * distance);
-
-                Block block = _world.BlockAt((int)index.Position.X, (int)index.Position.Y, (int)index.Position.Z);
-
-                if (block != null)
-                {
-                    if (block.BlockType == BlockType.None)
-                        _blockSelection.SetAimedBlock(new Vector3i(index.Position), block.BlockType, false);
-                    else if (block.IsActive)
-                    {
-                        _blockSelection.SetAimedBlock(new Vector3i(index.Position), block.BlockType, true);
-                        return;
-                    }
-
-                }
-                distance += 0.2f;
-            }
-
-            _blockSelection.AimedSolidBlock = null;
-        }
-
         private Ray GetMouseRay()
         {
             MouseState mouseState = Mouse.GetState();
@@ -535,6 +503,11 @@ namespace Test
                 _bubbleParticleSystem.Draw(gameTime);
             }
             _snowParticleSystem.Draw(gameTime);
+        }
+
+        private void OnBlockSelection(Vector3 position)
+        {
+            _blockSelection.SetStartingPoint(new Vector3i(position));
         }
     }
 }
