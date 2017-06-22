@@ -64,6 +64,5 @@ namespace Engine.WorldEngine
         {
             return new Vector3(x, y, z);
         }
-
     }
 }
