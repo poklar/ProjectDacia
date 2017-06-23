@@ -10,21 +10,23 @@ namespace Engine.WorldEngine
     /// <summary>
     /// The block selector
     /// </summary>
+    // TODO: Using models for now, should switch to vertices
     public class BlockSelection
     {
         private TechCraftGame _game;
         private World _world;
 
-        private List<PositionedBlock> _selectedBlocks;
+        private Dictionary<PositionedBlock, Texture2D> _selectedBlocks;
         private PositionedBlock? _startBlock;
         private bool _startingBlockSelected;
         
 
         private Model _aimedBlockModel;
         private BasicEffect _aimedBlockEffect;
-        private Texture2D _aimedBlockTexture;
+        private Texture2D _aimedBlockWhiteTexture;
+        private Texture2D _aimedBlockRedTexture;
 
-        
+
         /// <summary>
         /// Gets or sets the aimed solid block.
         /// </summary>
@@ -59,27 +61,42 @@ namespace Engine.WorldEngine
             }
         }
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         public void Initialize()
         {
-            _selectedBlocks = new List<PositionedBlock>();
+            _selectedBlocks = new Dictionary<PositionedBlock, Texture2D>();
             _startingBlockSelected = false;
         }
 
 
+        /// <summary>
+        /// Loads the content.
+        /// </summary>
         public void LoadContent()
         {
             //_aimedBlockModel = _game.Content.Load<Model>("Models\\AimedBlock");
             _aimedBlockModel = _game.Content.Load<Model>("Models\\selectionModel");
             _aimedBlockEffect = new BasicEffect(_game.GraphicsDevice);
             //_aimedBlockTexture = _game.Content.Load<Texture2D>("Textures\\AimedBlock");
-            _aimedBlockTexture = _game.Content.Load<Texture2D>("Textures\\whiteSelectionTex");
+            _aimedBlockWhiteTexture = _game.Content.Load<Texture2D>("Textures\\whiteSelectionTex");
+            _aimedBlockRedTexture = _game.Content.Load<Texture2D>("Textures\\redSelectionTex");
         }
 
+        /// <summary>
+        /// Updates the specified game time.
+        /// </summary>
+        /// <param name="gameTime">The game time.</param>
         public void Update(GameTime gameTime)
         {
 
         }
 
+        /// <summary>
+        /// Draws the specified game time.
+        /// </summary>
+        /// <param name="gameTime">The game time.</param>
         public void Draw(GameTime gameTime)
         {
             if (_startingBlockSelected)
@@ -109,7 +126,7 @@ namespace Engine.WorldEngine
         /// </summary>
         public void CancelSelection()
         {
-            // Clear the list of selected blocks
+            // Clear the dictionary of selected blocks
             _selectedBlocks.Clear();
 
             // Reset the starting block
@@ -130,49 +147,66 @@ namespace Engine.WorldEngine
                 AimedEmptyBlock = new PositionedBlock(position, blockType);
         }
 
-        public void FindAimedBlock(Vector3 lookVector)
+        /// <summary>
+        /// Finds the aimed (targeted) block.
+        /// </summary>
+        public void FindAimedBlock()
         {
+            BlockIndex index;
             float distance = 0.0f;
-            float? intersect;
+            //float? intersect;            
 
+            // Get the current mouse state
             MouseState mouseState = Mouse.GetState();
+
+            // Get mouse positions
             Vector2 mousePos = new Vector2(mouseState.X, mouseState.Y);
 
+            // Calculate where the mouse points to
             Ray ray = Camera.GetMouseRay(mousePos, _game.GraphicsDevice.Viewport);
-            BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);
-
-            while (distance <= 100f)
+           
+            // While within reach
+            while (distance <= WorldSettings.BlockEditing.PLAYERREACH)
             {
+                // Create a box at calculated position
                 index = new BlockIndex(ray.Direction * distance + ray.Position);
 
-                intersect = index.GetBoundingBox().Intersects(ray);
+                //intersect = index.GetBoundingBox().Intersects(ray);
 
-                Vector3 target = Camera.Position + (lookVector * distance);
-
+                // Get the block from the previous calculated index
                 Block block = _world.BlockAt((int)index.Position.X, (int)index.Position.Y, (int)index.Position.Z);
 
-                if (block != null)
+                // If there isn't a block
+                if (block.BlockType == BlockType.None)
+                    // Set empty aimed block
+                    // TODO: does this even have a point? REMOVE?
+                    SetAimedBlock(new Vector3i(index.Position), block.BlockType, false);
+                // If there's a block and it is active
+                else if (block.BlockType != BlockType.None && block.IsActive)
                 {
-                    if (block.BlockType == BlockType.None)
-                        SetAimedBlock(new Vector3i(index.Position), block.BlockType, false);
-                    else if (block.IsActive)
+                    // If there's a starting block selected for editing
+                    if (_startingBlockSelected)
                     {
-                        if (_startingBlockSelected)
-                        {
-                            PositionedBlock currentSelectedBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
-                            
-                            if (_startBlock != null)
-                                CalculateGrid(currentSelectedBlock);                        
-                        }
-                        else
-                            SetAimedBlock(new Vector3i(index.Position), block.BlockType, true);
-                        return;
+                        // Create a positioned block from the current selected block
+                        PositionedBlock currentSelectedBlock = new PositionedBlock(new Vector3i(index.Position), block.BlockType);
+                        
+                        // Check if the starting block is set    
+                        if (_startBlock != null)
+                            // Calculate the grid
+                            CalculateGrid(currentSelectedBlock);                        
                     }
-
+                    // If not in editing mode
+                    else
+                        // Set aimed block
+                        SetAimedBlock(new Vector3i(index.Position), block.BlockType, true);
+                    return;
                 }
+
+                // Increaase the distance
                 distance += 0.2f;
             }
 
+            // Reset aimed block
             AimedSolidBlock = null;
         }
 
@@ -182,7 +216,7 @@ namespace Engine.WorldEngine
         /// <param name="currentBlock">The current block.</param>
         private void CalculateGrid(PositionedBlock currentBlock)
         {
-            // Clear the array so it will start all over
+            // Clear the dictionary so it will start all over
             _selectedBlocks.Clear();
 
             // Get the starting position of the first block
@@ -227,13 +261,14 @@ namespace Engine.WorldEngine
         }
 
         /// <summary>
-        /// Adds the selected block to the list.
+        /// Adds the selected block to the dictionary.
         /// </summary>
         /// <param name="x">The x coordinate.</param>
         /// <param name="y">The y coordinate.</param>
         /// <param name="z">The z coordinate.</param>
         private void AddSelectedBlock(float x, float y, float z)
         {
+            // Convert postion to a Vector3
             Vector3 position = new Vector3(x, y, z);
             // Find the blocktype
             BlockType blockType = _world.BlockTypeAtPoint(position);
@@ -244,12 +279,21 @@ namespace Engine.WorldEngine
                 // Create positioned block
                 PositionedBlock posBlock = new PositionedBlock(new Vector3i(position), blockType);
 
-                // Add it to the list
-                _selectedBlocks.Add(posBlock);
+                // TODO: JUST FOR TESTING, later on more block types needs to be checked if it's possible to build there
+                // TODO: Check if building is possible
+                if (blockType == BlockType.Grass)
+                    // Possible to build here so add block and the white texture to dictionary
+                    _selectedBlocks.Add(posBlock, _aimedBlockWhiteTexture);
+                else
+                    // Not possible to build here, add block and the red texture to the dictionary
+                    _selectedBlocks.Add(posBlock, _aimedBlockRedTexture);
             }
-                
+
         }
 
+        /// <summary>
+        /// Renders the aimed block.
+        /// </summary>
         private void RenderAimedBlock()
         {
             _game.GraphicsDevice.BlendState = BlendState.NonPremultiplied;
@@ -268,7 +312,7 @@ namespace Engine.WorldEngine
             _aimedBlockEffect.World = identity;
             _aimedBlockEffect.View = Camera.View;
             _aimedBlockEffect.Projection = Camera.Projection;
-            _aimedBlockEffect.Texture = _aimedBlockTexture;
+            _aimedBlockEffect.Texture = _aimedBlockWhiteTexture;
             _aimedBlockEffect.TextureEnabled = true;
 
             foreach (EffectPass pass in _aimedBlockEffect.CurrentTechnique.Passes)
@@ -302,7 +346,7 @@ namespace Engine.WorldEngine
             {
                 foreach (var item in _selectedBlocks)
                 {
-                    var position = item.Position.AsVector3() + new Vector3(0.5f, 0.5f, 0.5f);
+                    var position = item.Key.Position.AsVector3() + new Vector3(0.5f, 0.5f, 0.5f);
                     Matrix matrix_a, matrix_b;
                     Matrix identity = Matrix.Identity; // setup the matrix prior to translation and scaling  
                     Matrix.CreateTranslation(ref position, out matrix_a);
@@ -314,7 +358,7 @@ namespace Engine.WorldEngine
                     _aimedBlockEffect.World = identity;
                     _aimedBlockEffect.View = Camera.View;
                     _aimedBlockEffect.Projection = Camera.Projection;
-                    _aimedBlockEffect.Texture = _aimedBlockTexture;
+                    _aimedBlockEffect.Texture = item.Value;
                     _aimedBlockEffect.TextureEnabled = true;
 
                     foreach (EffectPass pass in _aimedBlockEffect.CurrentTechnique.Passes)

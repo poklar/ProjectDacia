@@ -176,7 +176,7 @@ namespace Test
 
             if (_onBlockSlection)
             {
-                _blockSelection.FindAimedBlock(_lookVector);
+                _blockSelection.FindAimedBlock();
             }
 
             UpdatePosition(gameTime);
@@ -193,12 +193,13 @@ namespace Test
         public void CheckBuild(GameTime gameTime)
         {
             PlayerIndex controlIndex;
-
-            MouseState mouseState = Mouse.GetState();
-
             float distance = 0.0f;
 
-            Ray ray = GetMouseRay();
+            MouseState mouseState = Mouse.GetState();
+            Vector2 mousePos = new Vector2(mouseState.X, mouseState.Y);            
+
+            Ray ray = Camera.GetMouseRay(mousePos, _game.GraphicsDevice.Viewport);
+            
             BlockIndex index = new BlockIndex(ray.Direction * distance + ray.Position);
 
             if (mouseState.LeftButton == ButtonState.Pressed)
@@ -209,7 +210,7 @@ namespace Test
             if (mouseState.LeftButton == ButtonState.Released && _previousMouseState.LeftButton != ButtonState.Released)
             {
                 // TODO: Compare mouse start position and current position
-                for (float x = 0.5f; x < 100f; x += 0.2f)
+                for (float x = 0.4f; x < WorldSettings.BlockEditing.PLAYERREACH; x += 0.2f)
                 {
                     index = new BlockIndex(ray.Direction * distance + ray.Position);
 
@@ -250,7 +251,7 @@ namespace Test
 
                     float hit = 0;
                     //for (float x = 0.8f; x < 5f; x += 0.1f)
-                    for (float x = 0.5f; x < 100f; x += 0.2f)
+                    for (float x = 0.4f; x < WorldSettings.BlockEditing.PLAYERREACH; x += 0.2f)
                     {
                         //Vector3 targetPoint = Camera.Position + (_lookVector * x);
                         index = new BlockIndex(ray.Direction * distance + ray.Position);
@@ -438,14 +439,6 @@ namespace Test
             if (TryToMoveTo(rotatedMoveVector, gameTime)) { }
             else if (!TryToMoveTo(new Vector3(0, 0, rotatedMoveVector.Z), gameTime)) { }
             else if (!TryToMoveTo(new Vector3(rotatedMoveVector.X, 0, 0), gameTime)) { }
-        }
-
-        private Ray GetMouseRay()
-        {
-            MouseState mouseState = Mouse.GetState();
-            Vector2 mousePos = new Vector2(mouseState.X, mouseState.Y);
-
-            return Camera.GetMouseRay(mousePos, _game.GraphicsDevice.Viewport);
         }
 
         private bool TryToMoveTo(Vector3 moveVector, GameTime gameTime)

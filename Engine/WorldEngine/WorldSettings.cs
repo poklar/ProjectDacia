@@ -80,5 +80,10 @@ namespace Engine.WorldEngine
         {
             return new Vector2((TEXTURESIZE / 8f) * x, (TEXTURESIZE / 8f) * y);
         }
+
+        public class BlockEditing
+        {
+            public const float PLAYERREACH = 100f;
+        }
     }
 }
