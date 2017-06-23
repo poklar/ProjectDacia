@@ -1,6 +1,17 @@
 Engine:
 
-- Select multiple tiles
+V 0.1.1
+You can now select multiple blocks. Still needs work. Like checking if the selection is valid.
+
+Todo:
+- Change landscape
+- Move camera when mouse is at the edge of the screen
+- Add collision detection ?
+- Fix floor selection 
+
+V 0.1
+Todo:
+- Select multiple blocks
 - Change landscape
 - Move camera when mouse is at the edge of the screen
 - Add collision detection ?
